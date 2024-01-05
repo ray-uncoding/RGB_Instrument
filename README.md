@@ -1,4 +1,6 @@
 # RGB_Instrument
- 這是一個實踐大學工業設計系的案子，我要製作一組rgb樂器，裡面有一個主機跟三個從機
 
-2024/1/4
+
+2024/1/5
+
+function zero rgbONOFF
