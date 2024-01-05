@@ -5,8 +5,10 @@
 #define NUM_UNITS 3                                                     // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 6                                             // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
-#define LED_PIN 11                                                      // 連接第一個LED的腳位
+#define LED_PIN 39                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
+
+#define BOTTON_PIN 37
 
 float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
 
@@ -18,6 +20,9 @@ int client_chang = 1;  //調整樂器單元亮度變化
 bool last_workState;
 bool workState = false;  //關機
 
+bool last_bottonState = true;
+bool bottonState = true;
+
 int loop_rate = 50;
 
 void setup() {
@@ -26,9 +31,14 @@ void setup() {
   leds.begin();  //led初始化
   leds.show();
   /*-----------*/
+  pinMode(BOTTON_PIN, INPUT_PULLUP);
 }
 void loop() {
   deloperSerialCmdMode();
+  bottonState = digitalRead(BOTTON_PIN);
+  if(ifBottonPress()){
+    bottonEvent(client_Bright, client_chang);
+  }
   ONorOFFAnimate();
   /*------on-------*/
   if (workState) {
@@ -41,6 +51,7 @@ void loop() {
   /*------loop rate------*/
   refreshBright();
   last_workState = workState;
+  last_bottonState = bottonState;
   delay(loop_rate);
 }
 
@@ -131,5 +142,12 @@ void deloperSerialCmdMode() {
       bottonEvent(client_Bright, client_chang);
       cmd = 'p';
       break;
+  }
+}
+int ifBottonPress(){
+  if(last_bottonState == true && bottonState == false){
+    return true;
+  }else{
+    return false;
   }
 }
