@@ -1,14 +1,20 @@
 #include <WiFi.h>
 #include <ESPAsyncWebSrv.h>
 #include <Adafruit_NeoPixel.h>
+#include "SoftwareSerial.h"
+#include "DFRobotDFPlayerMini.h"
 
 #define NUM_UNITS 3                                                     // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 6                                             // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
-#define LED_PIN 39                                                      // 連接第一個LED的腳位
+#define LED_PIN 38                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
 
+SoftwareSerial mySoftwareSerial(39, 40); // RX, TX
+DFRobotDFPlayerMini myDFPlayer;
+
 #define BOTTON_PIN 37
+#define BUZY_PIN 1
 
 float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
 
@@ -23,21 +29,35 @@ bool workState = false;  //關機
 bool last_bottonState = true;
 bool bottonState = true;
 
+bool isPlaying = false;
+
 int loop_rate = 50;
 
 void setup() {
   Serial.begin(921600);
+  mySoftwareSerial.begin(9600);
   /*-----------*/
   leds.begin();  //led初始化
   leds.show();
   /*-----------*/
   pinMode(BOTTON_PIN, INPUT_PULLUP);
+  pinMode(BUZY_PIN, INPUT);
+
+  if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+    Serial.println(F("Unable to begin:"));
+    Serial.println(F("1.Please recheck the connection!"));
+    Serial.println(F("2.Please insert the SD card!"));
+    while(true){};
+  }
+
+  myDFPlayer.volume(10);  //Set volume value. From 0 to 30
 }
 void loop() {
   deloperSerialCmdMode();
   bottonState = digitalRead(BOTTON_PIN);
   if(ifBottonPress()){
     bottonEvent(client_Bright, client_chang);
+    myDFPlayer.play(1);
   }
   ONorOFFAnimate();
   /*------on-------*/
