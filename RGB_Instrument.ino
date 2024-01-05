@@ -10,7 +10,7 @@
 #define LED_PIN 38                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
 
-SoftwareSerial mySoftwareSerial(39, 40); // RX, TX
+SoftwareSerial mySoftwareSerial(10, 9); // RX, TX
 DFRobotDFPlayerMini myDFPlayer;
 
 #define BOTTON_PIN 37
@@ -43,13 +43,15 @@ void setup() {
   pinMode(BOTTON_PIN, INPUT_PULLUP);
   pinMode(BUZY_PIN, INPUT);
 
-  if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+  while (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
     Serial.println(F("2.Please insert the SD card!"));
-    while(true){};
+    mySoftwareSerial.begin(9600);
+    delay(1000);
   }
 
+  Serial.println(F("begin!"));
   myDFPlayer.volume(10);  //Set volume value. From 0 to 30
 }
 void loop() {
@@ -160,6 +162,8 @@ void deloperSerialCmdMode() {
       break;
     case 'a':
       bottonEvent(client_Bright, client_chang);
+      myDFPlayer.play(1);
+      Serial.println("a");
       cmd = 'p';
       break;
   }
