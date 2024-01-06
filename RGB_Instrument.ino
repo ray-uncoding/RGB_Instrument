@@ -43,12 +43,15 @@ void setup() {
   pinMode(BOTTON_PIN, INPUT_PULLUP);
   pinMode(BUZY_PIN, INPUT);
 
-  while (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+  if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
     Serial.println(F("2.Please insert the SD card!"));
-    mySoftwareSerial.begin(9600);
-    delay(1000);
+    //mySoftwareSerial.begin(9600);
+    //delay(1000);
+    while (1) {
+    
+    }
   }
 
   Serial.println(F("begin!"));
@@ -57,6 +60,10 @@ void setup() {
 void loop() {
   deloperSerialCmdMode();
   bottonState = digitalRead(BOTTON_PIN);
+
+
+  myDFPlayer.play(1);
+  delay(1000);
   if(ifBottonPress()){
     bottonEvent(client_Bright, client_chang);
     myDFPlayer.play(1);
