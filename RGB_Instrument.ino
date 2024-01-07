@@ -3,14 +3,14 @@
 #include <Adafruit_NeoPixel.h>
 
 #define NUM_UNITS 3                                                     // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 2                                             // 每個單元的LED數量
+#define NUM_LEDS_PER_UNIT 13                                             // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
 #define LED_PIN 11                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
 
-float client1_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
-float client2_RGB[3] = { 50.00, 200.00, 50.00 };
-float client3_RGB[3] = { 50.00, 50.00, 200.00 };
+float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
+float client2_RGB[3] = { 72.00, 193.00, 172.00 };
+float client3_RGB[3] = { 255.00, 71.00, 34.00 };
 
 float client1_Bright = 0.10;  //調整樂器單元亮度
 float client2_Bright = 0.10;
@@ -22,7 +22,7 @@ int client2_chang = 1;
 int client3_chang = 1;
 
 bool last_workState;
-bool workState = false;  //關機
+bool workState = true;  //關機
 
 int loop_rate = 50;
 
@@ -40,10 +40,12 @@ void loop() {
   /*------on-------*/
   if (workState) {
     allBrightToTen();
+    Serial.println(F("on"));
   }
   /*------off------*/
   else {
     allBrightToZero();
+    Serial.println(F("off"));
   }
   /*------loop rate------*/
   refreshBright();
