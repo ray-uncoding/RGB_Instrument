@@ -19,14 +19,32 @@ DFRobotDFPlayerMini myDFPlayer;
 
 
 // Replace with your network credentials
+const char *ssid = "Liangyu";
+const char *password = "10635493";
+
+/*
+// Replace with your network credentials
 const char *ssid = "pan0428";
 const char *password = "04836920";
-const char *host = "192.168.128.189";  // 主機的 IP 地址
+*/
+
+const char *host = "192.168.43.221";  // 主機的 IP 地址
 int port = 80;                         // 主機的端口
+
+// Create AsyncWebServer object on port 80
+AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
+
+/*
+float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
+float client2_RGB[3] = { 72.00, 193.00, 172.00 };
+float client3_RGB[3] = { 255.00, 71.00, 34.00 };
+float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
+*/
 
 WebSocketsClient webSocket;
 
-float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
+float client_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
 
 float client_Bright = 0.10;  //調整樂器單元亮度
 float brightIntervel = 0.04;
