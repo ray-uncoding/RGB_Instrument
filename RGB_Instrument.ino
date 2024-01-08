@@ -1,19 +1,19 @@
 #include <WiFi.h>
 #include <ESPAsyncWebSrv.h>
-#include "WebSocketClient.h"
 #include <Adafruit_NeoPixel.h>
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
+#include <WebSocketsClient.h>
 
 #define NUM_UNITS 1                                                     // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 27                                             // 每個單元的LED數量
+#define NUM_LEDS_PER_UNIT 27                                            // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
 #define LED_PIN 11                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
-
-SoftwareSerial mySoftwareSerial(15, 16); // RX, TX
+/*
+SoftwareSerial mySoftwareSerial(15, 16);  // RX, TX
 DFRobotDFPlayerMini myDFPlayer;
-
+*/
 #define BOTTON_PIN 9
 #define BUZY_PIN 6
 
@@ -21,10 +21,10 @@ DFRobotDFPlayerMini myDFPlayer;
 // Replace with your network credentials
 const char *ssid = "pan0428";
 const char *password = "04836920";
-
-AsyncWebSocket ws("/ws");
 const char *host = "192.168.128.189";  // 主機的 IP 地址
-int port = 81;                           // 主機的端口
+int port = 80;                         // 主機的端口
+
+WebSocketsClient webSocket;
 
 float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
 
@@ -45,14 +45,14 @@ int loop_rate = 50;
 
 void setup() {
   Serial.begin(921600);
-  mySoftwareSerial.begin(9600);
+  //mySoftwareSerial.begin(9600);
   /*-----------*/
   leds.begin();  //led初始化
   leds.show();
   /*-----------*/
   pinMode(BOTTON_PIN, INPUT_PULLUP);
   pinMode(BUZY_PIN, INPUT);
-
+/*
   if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
@@ -63,10 +63,10 @@ void setup() {
     }
   }
   Serial.println(F("begin!"));
-  myDFPlayer.volume(30);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(30);  //Set volume value. From 0 to 30*/
   workState = true;
 
-  
+
   //wifi 連線
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -74,15 +74,17 @@ void setup() {
     Serial.println("Connecting to WiFi..");
   }
   Serial.println(WiFi.localIP());
-  initWebSocket();
-
+  webSocket.begin(host, port, "/ws");
+  webSocket.onEvent(webSocketEvent);
 }
 void loop() {
+  webSocket.loop();
   deloperSerialCmdMode();
   bottonState = digitalRead(BOTTON_PIN);
-  if(ifBottonPress()){
+  if (ifBottonPress()) {
     bottonEvent(client_Bright, client_chang);
-    myDFPlayer.play(2);
+   // myDFPlayer.play(2);
+    webSocket.sendTXT("toggle");
   }
   ONorOFFAnimate();
   /*------on-------*/
@@ -133,7 +135,6 @@ void bottonEvent(float &client_Bright, int &client_chang) {
 void allClientVerToZero() {
   client_Bright = 0;
   client_chang = 0;
-
 }
 void allBrightToTen() {
   brightToTen(client_Bright, client_chang);
@@ -191,14 +192,25 @@ void deloperSerialCmdMode() {
       break;
   }
 }
-int ifBottonPress(){
-  if(last_bottonState == true && bottonState == false){
+int ifBottonPress() {
+  if (last_bottonState == true && bottonState == false) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
-void initWebSocket() {
-  //ws.onEvent(onEvent);
-  ws.begin(host, port, "/");
+
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      Serial.println("WebSocket disconnected");
+      break;
+    case WStype_CONNECTED:
+      Serial.println("WebSocket connected");
+      break;
+    case WStype_TEXT:
+      Serial.println("Received text: " + String((char *)payload));
+      // 在這裡處理從主機接收到的消息
+      break;
+  }
 }
