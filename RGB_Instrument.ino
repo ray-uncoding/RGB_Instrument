@@ -12,10 +12,16 @@
 #define LED_PIN 11                                                            // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);        //  定義ws2812燈條
 
-
+/*
 // Replace with your network credentials
 const char *ssid = "pan0428";
 const char *password = "04836920";
+*/
+
+// Replace with your network credentials
+const char *ssid = "Liangyu";
+const char *password = "10635493";
+
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
