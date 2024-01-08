@@ -225,6 +225,18 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       workState = !workState;
       notifyClients();
     }
+    if (strcmp((char *)data, "clientone") == 0) {
+      bottonEvent(client1_Bright, client1_chang);
+      //notifyClients();
+    }
+    if (strcmp((char *)data, "clienttwo") == 0) {
+      bottonEvent(client2_Bright, client2_chang);
+      //notifyClients();
+    }
+    if (strcmp((char *)data, "clientthree") == 0) {
+      bottonEvent(client3_Bright, client3_chang);
+      //notifyClients();
+    }
   }
 }
 
