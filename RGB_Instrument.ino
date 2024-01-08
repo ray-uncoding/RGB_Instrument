@@ -2,6 +2,8 @@
 #include <ESPAsyncWebSrv.h>
 #include <Adafruit_NeoPixel.h>
 
+#include "index.h"
+
 #define POWER_ONOFF_PIN 6
 #define NUM_UNITS 3           // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 13  // 每個單元的LED數量
@@ -9,6 +11,14 @@
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT + NUM_POWER_ONOFF_LED)  // 總LED數量
 #define LED_PIN 11                                                            // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);        //  定義ws2812燈條
+
+
+// Replace with your network credentials
+const char *ssid = "pan0428";
+const char *password = "04836920";
+// Create AsyncWebServer object on port 80
+AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 
 float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
 float client2_RGB[3] = { 72.00, 193.00, 172.00 };
@@ -37,19 +47,35 @@ void setup() {
   leds.show();
   /*-----------*/
   pinMode(POWER_ONOFF_PIN, INPUT_PULLUP);
+
+  //wifi 連線
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi..");
+  }
+  Serial.println(WiFi.localIP());
+  initWebSocket();
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", index_html, processor);
+  });
+
+  server.begin();
 }
 void loop() {
+  ws.cleanupClients();
   ONorOFFAnimate();
   deloperSerialCmdMode();
   /*------on-------*/
   if (workState) {
     allBrightToTen();
-    Serial.println(F("on"));
+    //Serial.println(F("on"));
   }
   /*------off------*/
   else {
     allBrightToZero();
-    Serial.println(F("off"));
+    //Serial.println(F("off"));
   }
   /*------loop rate------*/
   refreshBright();
@@ -107,8 +133,8 @@ void allBrightToZero() {
   brightToZero(client3_Bright, client3_chang);
 }
 void ONorOFFAnimate() {
-  bool term = digitalRead(POWER_ONOFF_PIN);
-  workState = term;
+  //bool term = digitalRead(POWER_ONOFF_PIN);
+  //workState = term;
   if (workState == true && last_workState == false) {  //開機動畫
     allClientVerToZero();
     for (int i = 0; i < 100; i++) {
@@ -184,4 +210,55 @@ void deloperSerialCmdMode() {
       cmd = 'p';
       break;
   }
+}
+
+
+void notifyClients() {
+  ws.textAll(String(workState));
+}
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  AwsFrameInfo *info = (AwsFrameInfo *)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    if (strcmp((char *)data, "toggle") == 0) {
+      workState = !workState;
+      notifyClients();
+    }
+  }
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
+}
+
+void initWebSocket() {
+  ws.onEvent(onEvent);
+  server.addHandler(&ws);
+}
+
+String processor(const String &var) {
+  Serial.println(var);
+  if (var == "STATE") {
+    if (workState) {
+      return "ON";
+    } else {
+      return "OFF";
+    }
+  }
+  return String();
 }
