@@ -65,13 +65,15 @@ const char index_html[] PROGMEM = R"rawliteral(
      font-weight: bold;
    }
   </style>
+
 <title>ESP Web Server</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
 </head>
+
 <body>
   <div class="topnav">
-    <h1>ESP WebSocket Server</h1>
+    <h1>WIFI RGB INSTRUMENTS</h1>
   </div>
   <div class="content">
     <div class="card">
@@ -79,10 +81,16 @@ const char index_html[] PROGMEM = R"rawliteral(
       <p class="state">state: <span id="state">%STATE%</span></p>
       <p><button id="button" class="button">Toggle</button></p>
     </div>
+    <div id="player"></div>
   </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script>
   var gateway = `ws://${window.location.hostname}/ws`;
   var websocket;
+  var player; // YouTube 播放器實例
+
   window.addEventListener('load', onLoad);
   function initWebSocket() {
     console.log('Trying to open a WebSocket connection...');
@@ -102,9 +110,12 @@ const char index_html[] PROGMEM = R"rawliteral(
     var state;
     if (event.data == "1"){
       state = "ON";
+      playVideo(); // 播放 YouTube 影片
     }
     else{
       state = "OFF";
+      pauseVideo(); // 暫停 YouTube 影片
+
     }
     document.getElementById('state').innerHTML = state;
   }
@@ -118,7 +129,46 @@ const char index_html[] PROGMEM = R"rawliteral(
   function toggle(){
     websocket.send('toggle');
   }
+  function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        
+        width: '100%',
+        videoId: 'r7Fh4bH_rvk',
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+
+    // 新增 onPlayerReady 函數
+    function onPlayerReady(event) {
+      // 這裡可以加入在播放器準備好時的程式碼
+    }
+
+    // 新增 onPlayerStateChange 函數
+    function onPlayerStateChange(event) {
+      // 這裡可以加入在播放器狀態改變時的程式碼
+
+      if (event.data === YT.PlayerState.ENDED) {
+      // 影片結束時重新播放
+      player.seekTo(0);
+    }
+
+    }
+
+    // 新增 playVideo 函數
+    function playVideo() {
+      player.playVideo();
+    }
+
+    // 新增 pauseVideo 函數
+    function pauseVideo() {
+      player.pauseVideo();
+    }
 </script>
+
 </body>
 </html>
 )rawliteral";
