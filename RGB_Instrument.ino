@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebSrv.h>
+#include "WebSocketClient.h"
 #include <Adafruit_NeoPixel.h>
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
@@ -15,6 +16,15 @@ DFRobotDFPlayerMini myDFPlayer;
 
 #define BOTTON_PIN 9
 #define BUZY_PIN 6
+
+
+// Replace with your network credentials
+const char *ssid = "pan0428";
+const char *password = "04836920";
+
+AsyncWebSocket ws("/ws");
+const char *host = "192.168.128.189";  // 主機的 IP 地址
+int port = 81;                           // 主機的端口
 
 float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
 
@@ -55,6 +65,17 @@ void setup() {
   Serial.println(F("begin!"));
   myDFPlayer.volume(30);  //Set volume value. From 0 to 30
   workState = true;
+
+  
+  //wifi 連線
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi..");
+  }
+  Serial.println(WiFi.localIP());
+  initWebSocket();
+
 }
 void loop() {
   deloperSerialCmdMode();
@@ -176,4 +197,8 @@ int ifBottonPress(){
   }else{
     return false;
   }
+}
+void initWebSocket() {
+  //ws.onEvent(onEvent);
+  ws.begin(host, port, "/");
 }
