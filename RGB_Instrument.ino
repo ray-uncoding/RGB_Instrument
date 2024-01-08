@@ -84,7 +84,7 @@ void loop() {
   if (ifBottonPress()) {
     bottonEvent(client_Bright, client_chang);
    // myDFPlayer.play(2);
-    webSocket.sendTXT("toggle");
+    webSocket.sendTXT("clientone");
   }
   ONorOFFAnimate();
   /*------on-------*/
@@ -186,7 +186,7 @@ void deloperSerialCmdMode() {
       break;
     case 'a':
       bottonEvent(client_Bright, client_chang);
-      myDFPlayer.play(1);
+      //myDFPlayer.play(1);
       Serial.println("a");
       cmd = 'p';
       break;
