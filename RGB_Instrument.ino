@@ -4,17 +4,17 @@
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 
-#define NUM_UNITS 3                                                     // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 6                                             // 每個單元的LED數量
+#define NUM_UNITS 1                                                     // 樂器單元數量
+#define NUM_LEDS_PER_UNIT 27                                             // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
-#define LED_PIN 38                                                      // 連接第一個LED的腳位
+#define LED_PIN 11                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
 
-SoftwareSerial mySoftwareSerial(10, 9); // RX, TX
+SoftwareSerial mySoftwareSerial(15, 16); // RX, TX
 DFRobotDFPlayerMini myDFPlayer;
 
-#define BOTTON_PIN 37
-#define BUZY_PIN 1
+#define BOTTON_PIN 9
+#define BUZY_PIN 6
 
 float client_RGB[3] = { 200.00, 50.00, 50.00 };  //調整樂器單元顏色
 
@@ -50,23 +50,18 @@ void setup() {
     //mySoftwareSerial.begin(9600);
     //delay(1000);
     while (1) {
-    
     }
   }
-
   Serial.println(F("begin!"));
-  myDFPlayer.volume(10);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(30);  //Set volume value. From 0 to 30
+  workState = true;
 }
 void loop() {
   deloperSerialCmdMode();
   bottonState = digitalRead(BOTTON_PIN);
-
-
-  myDFPlayer.play(1);
-  delay(1000);
   if(ifBottonPress()){
     bottonEvent(client_Bright, client_chang);
-    myDFPlayer.play(1);
+    myDFPlayer.play(2);
   }
   ONorOFFAnimate();
   /*------on-------*/
