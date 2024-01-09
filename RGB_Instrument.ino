@@ -23,17 +23,17 @@ const char *ssid = "Liangyu";
 const char *password = "10635493";
 
 /*
+const char *ssid = "money";
+const char *password = "$$$$$$$$";
+/*
 // Replace with your network credentials
 const char *ssid = "pan0428";
 const char *password = "04836920";
 */
 
 const char *host = "192.168.43.221";  // 主機的 IP 地址
-int port = 80;                         // 主機的端口
-
-// Create AsyncWebServer object on port 80
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
+//const char *host = "192.168.128.189";  // 主機的 IP 地址
+int port = 80;  // 主機的端口
 
 /*
 float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
@@ -44,7 +44,7 @@ float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
 
 WebSocketsClient webSocket;
 
-float client_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
+float client_RGB[3] = { 255.00, 71.00, 34.00 };  //調整樂器單元顏色
 
 float client_Bright = 0.10;  //調整樂器單元亮度
 float brightIntervel = 0.04;
@@ -70,7 +70,7 @@ void setup() {
   /*-----------*/
   pinMode(BOTTON_PIN, INPUT_PULLUP);
   pinMode(BUZY_PIN, INPUT);
-/*
+  /*
   if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
@@ -82,15 +82,25 @@ void setup() {
   }
   Serial.println(F("begin!"));
   myDFPlayer.volume(30);  //Set volume value. From 0 to 30*/
-  workState = true;
-
+  last_workState = 0;
+  workState = 1;
 
   //wifi 連線
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi..");
+    for (int i = 0; i < NUM_LEDS_PER_UNIT; i++) {
+      leds.setPixelColor(i, 255, 0, 0);
+    }
+    leds.show();
   }
+  for (int i = 0; i < NUM_LEDS_PER_UNIT; i++) {
+    leds.setPixelColor(i, 0, 255, 0);
+  }
+  leds.show();
+  delay(1000);
+
   Serial.println(WiFi.localIP());
   webSocket.begin(host, port, "/ws");
   webSocket.onEvent(webSocketEvent);
@@ -100,18 +110,20 @@ void loop() {
   deloperSerialCmdMode();
   bottonState = digitalRead(BOTTON_PIN);
   if (ifBottonPress()) {
-    bottonEvent(client_Bright, client_chang);
-   // myDFPlayer.play(2);
-    webSocket.sendTXT("clientone");
+    //bottonEvent(client_Bright, client_chang);
+    // myDFPlayer.play(2);
+    webSocket.sendTXT("clientthree");
   }
   ONorOFFAnimate();
   /*------on-------*/
   if (workState) {
-    allBrightToTen();
+    //allBrightToTen();
+    client_Bright = 0.8;
   }
   /*------off------*/
   else {
-    allBrightToZero();
+    //allBrightToZero();
+    client_Bright = 0;
   }
   /*------loop rate------*/
   refreshBright();
@@ -164,7 +176,7 @@ void ONorOFFAnimate() {
   if (workState == true && last_workState == false) {  //開機動畫
     allClientVerToZero();
     for (int i = 0; i < 100; i++) {
-      client_Bright += 0.001;
+      client_Bright += 0.005;
       refreshBright();
       delay(40);
     }
