@@ -6,7 +6,7 @@
 #include <WebSocketsClient.h>
 
 #define NUM_UNITS 1                                                     // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 27                                            // 每個單元的LED數量
+#define NUM_LEDS_PER_UNIT 30                                            // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
 #define LED_PIN 11                                                      // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
@@ -44,7 +44,7 @@ float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
 
 WebSocketsClient webSocket;
 
-float client_RGB[3] = { 255.00, 71.00, 34.00 };  //調整樂器單元顏色
+float client_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
 
 float client_Bright = 0.10;  //調整樂器單元亮度
 float brightIntervel = 0.04;
@@ -112,7 +112,7 @@ void loop() {
   if (ifBottonPress()) {
     //bottonEvent(client_Bright, client_chang);
     // myDFPlayer.play(2);
-    webSocket.sendTXT("clientthree");
+    webSocket.sendTXT("clientone");
   }
   ONorOFFAnimate();
   /*------on-------*/
