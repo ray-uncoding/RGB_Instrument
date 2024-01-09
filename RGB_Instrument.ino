@@ -17,6 +17,10 @@ Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);        //
 const char *ssid = "pan0428";
 const char *password = "04836920";
 */
+/*
+const char *ssid = "money";
+const char *password = "$$$$$$$$";
+*/
 
 // Replace with your network credentials
 const char *ssid = "Liangyu";
@@ -42,7 +46,7 @@ int client2_chang = 1;
 int client3_chang = 1;
 
 bool last_workState;
-bool workState = true;  //關機
+bool workState = 0;  //關機
 
 int loop_rate = 50;
 
