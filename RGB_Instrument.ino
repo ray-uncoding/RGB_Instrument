@@ -4,6 +4,7 @@
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 #include <WebSocketsClient.h>
+#include "WIFI_ID.h"
 
 #define NUM_UNITS 1                                                     // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 30                                            // 每個單元的LED數量
@@ -17,19 +18,6 @@ DFRobotDFPlayerMini myDFPlayer;
 #define BOTTON_PIN 9
 #define BUZY_PIN 6
 
-
-// Replace with your network credentials
-const char *ssid = "Liangyu";
-const char *password = "10635493";
-
-/*
-const char *ssid = "money";
-const char *password = "$$$$$$$$";
-/*
-// Replace with your network credentials
-const char *ssid = "pan0428";
-const char *password = "04836920";
-*/
 
 const char *host = "192.168.43.221";  // 主機的 IP 地址
 //const char *host = "192.168.128.189";  // 主機的 IP 地址
