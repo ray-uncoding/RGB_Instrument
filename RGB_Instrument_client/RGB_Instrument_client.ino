@@ -6,6 +6,11 @@
 #include <WebSocketsClient.h>
 #include "WIFI_ID.h"
 
+
+
+
+
+
 #define NUM_UNITS 1                                                     // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 30                                            // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
