@@ -3,30 +3,16 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "index.h"
+#include "WIFI_ID.h"
 
 #define POWER_ONOFF_PIN 6
 #define NUM_UNITS 3           // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 13  // 每個單元的LED數量
+#define NUM_LEDS_PER_UNIT 40  // 每個單元的LED數量
 #define NUM_POWER_ONOFF_LED 18
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT + NUM_POWER_ONOFF_LED)  // 總LED數量
-#define LED_PIN 11                                                            // 連接第一個LED的腳位
+#define LED_PIN 2                                                            // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);        //  定義ws2812燈條
 
-/*
-// Replace with your network credentials
-const char *ssid = "pan0428";
-const char *password = "04836920";
-*/
-/*
-const char *ssid = "money";
-const char *password = "$$$$$$$$";
-*/
-
-// Replace with your network credentials
-const char *ssid = "Liangyu";
-const char *password = "10635493";
-
-// Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
@@ -51,12 +37,12 @@ bool workState = 0;  //關機
 int loop_rate = 50;
 
 void setup() {
-  Serial.begin(921600);
+  Serial.begin(115200);
   /*-----------*/
   leds.begin();  //led初始化
   leds.show();
   /*-----------*/
-  pinMode(POWER_ONOFF_PIN, INPUT_PULLUP);
+  //pinMode(POWER_ONOFF_PIN, INPUT_PULLUP);
 
   //wifi 連線
   WiFi.begin(ssid, password);
