@@ -23,8 +23,9 @@ HardwareSerial myHardwareSerial(1);                                     //ESP32�
 DFRobotDFPlayerMini myDFPlayer;                                         //啟動DFPlayer撥放器
 WebSocketsClient webSocket;
 
-const char *host = "192.168.128.189";  // 主機的 IP 地址
-int port = 80;                         // 主機的端口
+//const char *host = "192.168.43.221";  // 當ip是MONEY時的 主機的 IP 地址
+const char *host = "192.168.128.189";  // 當ip是PAN時的 主機的 IP 地址
+int port = 80;  // 主機的端口
 
 /*---其他課服端的顏色----
 float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
@@ -93,10 +94,10 @@ int timer = 0;
 
 void loop() {
   /*------刷新系統變數-------*/
-  deloperSerialCmdMode();                 //刷新開發者指令
-  webSocket.loop();                       //刷新web
-  ONorOFFAnimate();                       //刷新開關機狀態
-  bottonState = digitalRead(BOTTON_PIN);  //刷新按鈕感測電壓, 壓下->0, 放開->1
+  deloperSerialCmdMode();                  //刷新開發者指令
+  webSocket.loop();                        //刷新web
+  ONorOFFAnimate();                        //刷新開關機狀態
+  bottonState = digitalRead(BOTTON_PIN);   //刷新按鈕感測電壓, 壓下->0, 放開->1
   bettery_voltage = digitalRead(VOL_PIN);  //刷新電池電壓, 0~1024
 
   /*------壓下按鈕時-------*/
@@ -299,7 +300,7 @@ void deloperSerialCmdMode() {
       break;
     case 3:
       myDFPlayer.play(music_file_hit_instrument);  //撥放mp3檔案2, 樂器擊打音效
-      webSocket.sendTXT(clientName);  //web傳送課服端名字
+      webSocket.sendTXT(clientName);               //web傳送課服端名字
       cmd = deadCmd;
       break;
     case 4:
