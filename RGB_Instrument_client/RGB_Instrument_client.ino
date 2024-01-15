@@ -1,32 +1,30 @@
 #include <WiFi.h>
 #include <ESPAsyncWebSrv.h>
 #include <Adafruit_NeoPixel.h>
-//#include "SoftwareSerial.h"
-//#include "DFRobotDFPlayerMini.h"
+//#include "SoftwareSerial.h" //  esp不能用這個
+#include "DFRobotDFPlayerMini.h"
 #include <WebSocketsClient.h>
 #include "WIFI_ID.h"
 
 #define SYSTEM_LED_PIN 2  //開機檢測燈
 #define BOTTON_PIN 6
-//#define MP3_RX_PIN 4
-//#define MP3_TX_PIN 5
-//#define MP3_BUZY_PIN 13  //監測音樂撥放與否
+#define MP3_RX_PIN 5
+#define MP3_TX_PIN 4
 #define LED_PIN 9
 #define VOL_PIN 7  //感測電池電壓
 #define MONITOR_BAUDRATE 921600
-//#define MP3_BAUDRATE 9600
+#define MP3_BAUDRATE 9600
 
 #define NUM_UNITS 1                                                     // 樂器單元數量
 #define NUM_LEDS_PER_UNIT 30                                            // 每個單元的LED數量
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT)                  // 總LED數量
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);  //  定義ws2812燈條
-//SoftwareSerial mySoftwareSerial(MP3_RX_PIN, MP3_TX_PIN);                // RX, TX
-//DFRobotDFPlayerMini myDFPlayer;
+HardwareSerial myHardwareSerial(1);                                     //ESP32可宣告需要一個硬體序列，軟體序列會出錯
+DFRobotDFPlayerMini myDFPlayer;                                         //啟動DFPlayer撥放器
 WebSocketsClient webSocket;
 
-const char *host = "192.168.128.61";  // 主機的 IP 地址
-//const char *host = "192.168.128.189";  // 主機的 IP 地址
-int port = 80;  // 主機的端口
+const char *host = "192.168.128.189";  // 主機的 IP 地址
+int port = 80;                         // 主機的端口
 
 /*---其他課服端的顏色----
 float client1_RGB[3] = { 100.00, 144.00, 232.00 };  //調整樂器單元顏色
@@ -47,10 +45,9 @@ int loop_rate = 50;          //刷新率
 /*------按鈕變數------*/
 bool last_bottonState = true;  //紀錄按鈕感測電壓, 壓下->0, 放開->1
 bool bottonState = true;       //預設按鈕感測電壓, 壓下->0, 放開->1
-/*------mp3變數-------
+/*------mp3變數-------*/
 bool isPlaying = false;             //是否正在撥放音樂, 是->0, 否->1
-int music_file_hit_instrument = 1;*/
-//擊打音效的檔案編號
+int music_file_hit_instrument = 2;  //擊打音效的檔案編號
 /*------電源變數------*/
 int bettery_voltage;  //紀錄電池電壓, 0~1024
 /*------web變數-------*/
@@ -65,10 +62,13 @@ int deadCmd = 0;
 void setup() {
   /*------系統設定-------*/
   Serial.begin(MONITOR_BAUDRATE);
-  //mySoftwareSerial.begin(MP3_BAUDRATE);
+
+  myHardwareSerial.begin(MP3_BAUDRATE, SERIAL_8N1, MP3_TX_PIN, MP3_RX_PIN);  // Serial的TX,RX
+  Serial.println("Initializing DFPlayer ... (May take 1-2 seconds)");
+  myDFPlayer.begin(myHardwareSerial);  //將DFPlayer播放器宣告在HardwareSerial控制
+
   Serial.println(F("begin setup system"));
   pinMode(BOTTON_PIN, INPUT_PULLUP);
-  // pinMode(MP3_BUZY_PIN, INPUT);
   pinMode(VOL_PIN, INPUT);
   pinMode(SYSTEM_LED_PIN, OUTPUT);
   Serial.println(F("system setup succed"));
@@ -76,26 +76,37 @@ void setup() {
   Serial.println(F("begin setup element"));
   leds.begin();
   setupWIFI();
-  //setupMP3Serial();
-  //myDFPlayer.volume(30);
+  myDFPlayer.volume(30);
   webSocket.begin(host, port, "/ws");
   webSocket.onEvent(webSocketEvent);
 
   allSetupOK();
+  /*
+  Serial.println("test1");
+  myDFPlayer.playMp3Folder(1);  //播放mp3內的0001.mp3 3秒鐘
+  delay(3000);*/
 }
+
+unsigned long previousMillis = 0;  // 保存上一次刷新的時間
+const int interval = 50;           // 刷新間隔，以毫秒為單位
+int timer = 0;
+
 void loop() {
   /*------刷新系統變數-------*/
   deloperSerialCmdMode();                 //刷新開發者指令
   webSocket.loop();                       //刷新web
   ONorOFFAnimate();                       //刷新開關機狀態
   bottonState = digitalRead(BOTTON_PIN);  //刷新按鈕感測電壓, 壓下->0, 放開->1
-  //isPlaying = digitalRead(MP3_BUZY_PIN);   //刷新是否撥放音樂, 是->0, 否->1
   bettery_voltage = digitalRead(VOL_PIN);  //刷新電池電壓, 0~1024
+
   /*------壓下按鈕時-------*/
   if (ifBottonPress()) {
-    //myDFPlayer.play(music_file_hit_instrument);  //撥放mp3檔案2, 樂器擊打音效
-    webSocket.sendTXT(clientName);               //web傳送課服端名字
+    Serial.println("press");
+    myDFPlayer.playMp3Folder(music_file_hit_instrument);  //播放mp3內的0001.mp3
+    webSocket.sendTXT(clientName);                        //web傳送課服端名字
+    timer = 40;
   }
+
   /*------次刷新系統變數------*/
   if (workState) client_Bright = 0.8;
   else client_Bright = 0;
@@ -287,8 +298,8 @@ void deloperSerialCmdMode() {
       cmd = deadCmd;
       break;
     case 3:
-      //myDFPlayer.play(music_file_hit_instrument);  //撥放mp3檔案2, 樂器擊打音效
-      webSocket.sendTXT(clientName);               //web傳送課服端名字
+      myDFPlayer.play(music_file_hit_instrument);  //撥放mp3檔案2, 樂器擊打音效
+      webSocket.sendTXT(clientName);  //web傳送課服端名字
       cmd = deadCmd;
       break;
     case 4:

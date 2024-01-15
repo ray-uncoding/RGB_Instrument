@@ -10,7 +10,7 @@
 #define NUM_LEDS_PER_UNIT 40  // 每個單元的LED數量
 #define NUM_POWER_ONOFF_LED 18
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT + NUM_POWER_ONOFF_LED)  // 總LED數量
-#define LED_PIN 2                                                            // 連接第一個LED的腳位
+#define LED_PIN 11                                                            // 連接第一個LED的腳位
 Adafruit_NeoPixel leds(NUM_LEDS_TOTAL, LED_PIN, NEO_GRB + NEO_KHZ800);        //  定義ws2812燈條
 
 AsyncWebServer server(80);
@@ -37,7 +37,7 @@ bool workState = 0;  //關機
 int loop_rate = 50;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(921600);
   /*-----------*/
   leds.begin();  //led初始化
   leds.show();
