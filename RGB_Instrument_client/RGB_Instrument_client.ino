@@ -34,21 +34,20 @@ float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
 
 /*------rgb變數-------*/
 float client_RGB[3] = { 100.00, 144.00, 232.00 };  //顏色
-float client_Bright = 0.10;                       //亮度
-float brightIntervel = 0.04;                      //亮度變化速度
-int client_chang = 1;                             //亮度變化方向, +-1
+float client_Bright = 0.10;                        //亮度
+float brightIntervel = 0.04;                       //亮度變化速度
+int client_chang = 1;                              //亮度變化方向, +-1
 /*------系統變數------*/
 bool last_workState = true;  //紀錄開關機狀態
 bool workState = true;       //預設開關機狀態
 unsigned long previousMillis = 0;
 const int interval = 50;
-int loop_rate = 50;  //刷新率
 /*------按鈕變數------*/
 bool last_bottonState = true;  //紀錄按鈕感測電壓, 壓下->0, 放開->1
 bool bottonState = true;       //預設按鈕感測電壓, 壓下->0, 放開->1
 /*------mp3變數-------*/
 bool isPlaying = false;             //是否正在撥放音樂, 是->0, 否->1
-int music_file_hit_instrument = 2;  //擊打音效的檔案編號
+int music_file_hit_instrument = 1;  //擊打音效的檔案編號
 /*------電源變數------*/
 int bettery_voltage;  //紀錄電池電壓, 0~1024
 /*------web變數-------*/
@@ -81,7 +80,7 @@ void setup() {
   webSocket.begin(host, port, "/ws");
   webSocket.onEvent(webSocketEvent);
 
-  allSetupOK();/*
+  allSetupOK(); /*
   Serial.println("test");
   myDFPlayer.playMp3Folder(2);  //播放mp3內的0001.mp3 3秒鐘
   delay(5000);
@@ -166,14 +165,16 @@ void allBrightToZero() {
 */
 void ONorOFFAnimate() {
   if (workState == true && last_workState == false) {  //開機動畫
+    Serial.println("ON ami");
     allClientVerToZero();
     for (int i = 0; i < 100; i++) {
-      client_Bright += 0.005;
+      client_Bright += 0.01;
       refreshBright();
       delay(40);
     }
     Serial.println(F("power on"));
   } else if (workState == false && last_workState == true) {  //關機動畫
+    Serial.println("OFF ami");
     for (int i = 0; i < 100; i++) {
       if (client_Bright > 0) {
         client_Bright -= 0.01;
@@ -230,10 +231,12 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 }
 
 void handleWebSocketMessage(char *message) {
-  if (strcmp(message, "ON") == 0) {
+  if (strcmp(message, "1") == 0) {
     workState = true;
-  } else if (strcmp(message, "OFF") == 0) {
+    Serial.println("ON");
+  } else if (strcmp(message, "0") == 0) {
     workState = false;
+    Serial.println("OFF");
   }
 }
 

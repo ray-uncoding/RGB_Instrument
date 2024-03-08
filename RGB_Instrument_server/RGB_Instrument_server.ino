@@ -7,7 +7,7 @@
 
 #define POWER_ONOFF_PIN 6
 #define NUM_UNITS 3           // 樂器單元數量
-#define NUM_LEDS_PER_UNIT 40  // 每個單元的LED數量
+#define NUM_LEDS_PER_UNIT 13  // 每個單元的LED數量
 #define NUM_POWER_ONOFF_LED 18
 #define NUM_LEDS_TOTAL (NUM_UNITS * NUM_LEDS_PER_UNIT + NUM_POWER_ONOFF_LED)  // 總LED數量
 #define LED_PIN 11                                                            // 連接第一個LED的腳位
@@ -34,7 +34,8 @@ int client3_chang = 1;
 bool last_workState;
 bool workState = 0;  //關機
 
-int loop_rate = 50;
+unsigned long previousMillis = 0;
+const int interval = 50;
 
 void setup() {
   Serial.begin(921600);
@@ -60,23 +61,27 @@ void setup() {
   server.begin();
 }
 void loop() {
-  ws.cleanupClients();
-  ONorOFFAnimate();
-  deloperSerialCmdMode();
-  /*------on-------*/
-  if (workState) {
-    allBrightToTen();
-    //Serial.println(F("on"));
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    ws.cleanupClients();
+    ONorOFFAnimate();
+    deloperSerialCmdMode();
+    /*------on-------*/
+    if (workState) {
+      allBrightToTen();
+      //Serial.println(F("on"));
+    }
+    /*------off------*/
+    else {
+      allBrightToZero();
+      //Serial.println(F("off"));
+    }
+    /*------loop rate------*/
+    refreshBright();
+    last_workState = workState;
   }
-  /*------off------*/
-  else {
-    allBrightToZero();
-    //Serial.println(F("off"));
-  }
-  /*------loop rate------*/
-  refreshBright();
-  last_workState = workState;
-  delay(loop_rate);
 }
 
 void brightToZero(float &client_Bright, int &client_chang) {
