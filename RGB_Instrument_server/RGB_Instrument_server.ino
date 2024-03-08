@@ -131,15 +131,6 @@ void allBrightToZero() {
 void ONorOFFAnimate() {
   //bool term = digitalRead(POWER_ONOFF_PIN);
   //workState = term;
-  if (workState != last_workState) {
-    if (workState == true) {
-      // 發送 "ON" 訊息給所有從機
-      ws.textAll("ON");
-    } else {
-      // 發送 "OFF" 訊息給所有從機
-      ws.textAll("OFF");
-    }
-  }
 
   if (workState == true && last_workState == false) {  //開機動畫
     allClientVerToZero();
@@ -220,7 +211,6 @@ void deloperSerialCmdMode() {
 void notifyClients() {
   ws.textAll(String(workState));
 }
-//if >> toggle; notify; 
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo *)arg;
@@ -232,12 +222,15 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
     if (strcmp((char *)data, "clientone") == 0) {
       bottonEvent(client1_Bright, client1_chang);
+      Serial.println("1");
     }
     if (strcmp((char *)data, "clienttwo") == 0) {
       bottonEvent(client2_Bright, client2_chang);
+      Serial.println("2");
     }
     if (strcmp((char *)data, "clientthree") == 0) {
       bottonEvent(client3_Bright, client3_chang);
+      Serial.println("3");
     }
   }
 }

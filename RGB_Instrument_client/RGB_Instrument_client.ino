@@ -23,8 +23,6 @@ HardwareSerial myHardwareSerial(1);                                     //ESP32�
 DFRobotDFPlayerMini myDFPlayer;                                         //啟動DFPlayer撥放器
 WebSocketsClient webSocket;
 
-//const char *host = "192.168.43.221";  // 當ip是MONEY時的 主機的 IP 地址
-const char *host = "192.168.128.189";  // 當ip是PAN時的 主機的 IP 地址
 int port = 80;  // 主機的端口
 
 /*---其他課服端的顏色----
@@ -35,14 +33,16 @@ float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
 --------------------*/
 
 /*------rgb變數-------*/
-float client_RGB[3] = { 255.00, 71.00, 34.00 };  //顏色
-float client_Bright = 0.10;                        //亮度
-float brightIntervel = 0.04;                       //亮度變化速度
-int client_chang = 1;                              //亮度變化方向, +-1
+float client_RGB[3] = { 100.00, 144.00, 232.00 };  //顏色
+float client_Bright = 0.10;                       //亮度
+float brightIntervel = 0.04;                      //亮度變化速度
+int client_chang = 1;                             //亮度變化方向, +-1
 /*------系統變數------*/
 bool last_workState = true;  //紀錄開關機狀態
 bool workState = true;       //預設開關機狀態
-int loop_rate = 50;          //刷新率
+unsigned long previousMillis = 0;
+const int interval = 50;
+int loop_rate = 50;  //刷新率
 /*------按鈕變數------*/
 bool last_bottonState = true;  //紀錄按鈕感測電壓, 壓下->0, 放開->1
 bool bottonState = true;       //預設按鈕感測電壓, 壓下->0, 放開->1
@@ -52,7 +52,7 @@ int music_file_hit_instrument = 2;  //擊打音效的檔案編號
 /*------電源變數------*/
 int bettery_voltage;  //紀錄電池電壓, 0~1024
 /*------web變數-------*/
-const char *clientName = "clientthree";
+const char *clientName = "clientone";
 /*-----開發者指令變數-----*/
 int on = 1;
 int off = 2;
@@ -81,40 +81,44 @@ void setup() {
   webSocket.begin(host, port, "/ws");
   webSocket.onEvent(webSocketEvent);
 
-  allSetupOK();
-  /*
-  Serial.println("test1");
-  myDFPlayer.playMp3Folder(1);  //播放mp3內的0001.mp3 3秒鐘
-  delay(3000);*/
+  allSetupOK();/*
+  Serial.println("test");
+  myDFPlayer.playMp3Folder(2);  //播放mp3內的0001.mp3 3秒鐘
+  delay(5000);
+  Serial.println("REtest");
+  myDFPlayer.playMp3Folder(1);  //播放mp3內的0001.mp3 3秒鐘*/
 }
 
-unsigned long previousMillis = 0;  // 保存上一次刷新的時間
-const int interval = 50;           // 刷新間隔，以毫秒為單位
-int timer = 0;
 
 void loop() {
   /*------刷新系統變數-------*/
-  deloperSerialCmdMode();                  //刷新開發者指令
-  webSocket.loop();                        //刷新web
-  ONorOFFAnimate();                        //刷新開關機狀態
-  bottonState = digitalRead(BOTTON_PIN);   //刷新按鈕感測電壓, 壓下->0, 放開->1
-  bettery_voltage = digitalRead(VOL_PIN);  //刷新電池電壓, 0~1024
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
 
-  /*------壓下按鈕時-------*/
-  if (ifBottonPress()) {
-    Serial.println("press");
-    myDFPlayer.playMp3Folder(music_file_hit_instrument);  //播放mp3內的0001.mp3
-    webSocket.sendTXT(clientName);                        //web傳送課服端名字
-    timer = 40;
+    deloperSerialCmdMode();                  //刷新開發者指令
+    webSocket.loop();                        //刷新web
+    ONorOFFAnimate();                        //刷新開關機狀態
+    bottonState = digitalRead(BOTTON_PIN);   //刷新按鈕感測電壓, 壓下->0, 放開->1
+    bettery_voltage = digitalRead(VOL_PIN);  //刷新電池電壓, 0~1024
+
+    /*------壓下按鈕時-------*/
+    if (ifBottonPress()) {
+      Serial.println("press");
+      myDFPlayer.playMp3Folder(music_file_hit_instrument);  //播放mp3內的0001.mp3
+      webSocket.sendTXT(clientName);                        //web傳送課服端名字
+      if (myDFPlayer.available()) {
+        uint8_t type = myDFPlayer.readType();
+      }
+    }
+
+    /*------次刷新系統變數------*/
+    if (workState) client_Bright = 0.8;
+    else client_Bright = 0;
+    refreshBright();                 //更新亮度
+    last_workState = workState;      //紀錄開關機狀態
+    last_bottonState = bottonState;  //紀錄按鈕感測電壓
   }
-
-  /*------次刷新系統變數------*/
-  if (workState) client_Bright = 0.8;
-  else client_Bright = 0;
-  refreshBright();                 //更新亮度
-  last_workState = workState;      //紀錄開關機狀態
-  last_bottonState = bottonState;  //紀錄按鈕感測電壓
-  delay(loop_rate);                //刷新率
 }
 /*
 void brightToZero(float &client_Bright, int &client_chang) {
