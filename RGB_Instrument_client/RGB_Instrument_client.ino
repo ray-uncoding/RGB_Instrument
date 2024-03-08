@@ -35,7 +35,7 @@ float powerONOFF_RGB[3] = { 255.00, 255.00, 255.00 };
 --------------------*/
 
 /*------rgb變數-------*/
-float client_RGB[3] = { 100.00, 144.00, 232.00 };  //顏色
+float client_RGB[3] = { 255.00, 71.00, 34.00 };  //顏色
 float client_Bright = 0.10;                        //亮度
 float brightIntervel = 0.04;                       //亮度變化速度
 int client_chang = 1;                              //亮度變化方向, +-1
@@ -52,7 +52,7 @@ int music_file_hit_instrument = 2;  //擊打音效的檔案編號
 /*------電源變數------*/
 int bettery_voltage;  //紀錄電池電壓, 0~1024
 /*------web變數-------*/
-const char *clientName = "clientone";
+const char *clientName = "clientthree";
 /*-----開發者指令變數-----*/
 int on = 1;
 int off = 2;
@@ -219,10 +219,20 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
       break;
     case WStype_TEXT:
       Serial.println("Received text: " + String((char *)payload));
+      handleWebSocketMessage((char *)payload);
       // 在這裡處理從主機接收到的消息
       break;
   }
 }
+
+void handleWebSocketMessage(char *message) {
+  if (strcmp(message, "ON") == 0) {
+    workState = true;
+  } else if (strcmp(message, "OFF") == 0) {
+    workState = false;
+  }
+}
+
 /*
 void setupMP3Serial() {  //建立mp3的serial連線, 失敗則頻閃橘色燈
   Serial.println(F("begin setup dfplayer"));
