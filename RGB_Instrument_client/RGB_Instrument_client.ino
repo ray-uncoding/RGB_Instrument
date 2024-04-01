@@ -66,8 +66,8 @@ void setup() {
   leds.begin();
   setupWIFI();
   myDFPlayer.volume(30);
-  //webSocket.begin(host, port, "/ws");
-  //webSocket.onEvent(webSocketEvent);
+  webSocket.begin(host, port, "/ws");
+  webSocket.onEvent(webSocketEvent);
 
   allSetupOK(); 
   /*
@@ -84,9 +84,7 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-
-    //deloperSerialCmdMode();                  //刷新開發者指令
-    //webSocket.loop();                        //刷新web
+    webSocket.loop();                        //刷新web
     ONorOFFAnimate();                        //刷新開關機狀態
     bottonState = digitalRead(BOTTON_PIN);   //刷新按鈕感測電壓, 壓下->0, 放開->1
     bettery_voltage = digitalRead(VOL_PIN);  //刷新電池電壓, 0~1024
@@ -95,7 +93,7 @@ void loop() {
     if (ifBottonPress()) {
       Serial.println("press");
       myDFPlayer.playMp3Folder(music_file_hit_instrument);  //播放mp3內的0001.mp3
-      //webSocket.sendTXT(clientName);                        //web傳送課服端名字
+      webSocket.sendTXT(clientName);                        //web傳送課服端名字
       if (myDFPlayer.available()) {
         uint8_t type = myDFPlayer.readType();
       }

@@ -10,7 +10,7 @@ const char *password = "04836920";
 #ifndef _MONEY_WIFI_ID_
 #define _MONEY_WIFI_ID_
 #include "Arduino.h"
-const char *ssid = "money";
+const char *ssid = "moneyyy";
 const char *password = "$$$$$$$$";
 #endif
 
